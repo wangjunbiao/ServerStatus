@@ -1,4 +1,4 @@
-# ServerStatus中文版：   
+# ServerStatus中文版修改：   
 
 * ServerStatus中文版是一个酷炫高逼格的云探针、云监控、服务器云监控、多服务器探针~，该云监控（云探针）是ServerStatus（ https://github.com/BotoX/ServerStatus ）项目的中文（优化）版。
 * 在线演示：https://tz.cloudcpp.com    
@@ -10,7 +10,7 @@
 * web      网站文件  
 
 # 更新说明：
-
+* 20180201，添加js密码验证
 * 20170807，更新平均1，5，15负载
 * 20170108, 更新支持所有系统
 * 20161205, 去掉无用的IPV6信息，增加服务器总流量监控                           
@@ -19,7 +19,7 @@
    
 【克隆代码】:
 ```
-git clone https://github.com/tenyue/ServerStatus.git
+git clone git@github.com:wangjunbiao/ServerStatus-CN.git
 ```
 
 【服务端配置】（服务端程序在ServerStatus/web下）:  
@@ -93,12 +93,13 @@ pip install psutil
 
 打开云探针页面，就可以正常的监控。接下来把服务器和客户端脚本自行加入开机启动，或者进程守护，或以后台方式运行即可！例如： nohup python client-linux.py &      
 
-# 为什么会有ServerStatus中文版：
+# 为什么会有ServerStatus中文版修改：
 
 * 有些功能确实没用
 * 原版本部署，英文说明复杂
 * 不符合中文版的习惯
 * 没有一次又一次的轮子，哪来如此优秀的云探针
+* 添加js密码验证
 
 # 相关开源项目，感谢： 
 
