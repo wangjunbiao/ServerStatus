@@ -60,6 +60,16 @@ web-dir参数为上一步设置的网站根目录，务必修改成自己网站�
 ```
 ./sergate --config=config.json --web-dir=/home/wwwroot/default   
 ```
+五、防火墙设置：
+```
+CetOS ≤6
+/sbin/iptables -I INPUT -p tcp --dport 8000 -j ACCEPT
+保存
+/etc/rc.d/init.d/iptables save
+-------
+CetOS ≥7
+firewall-cmd --zone=public --add-port=80/tcp --permanent    （--permanent永久生效，没有此参数重启后失效）
+```
 
 【客户端配置】（客户端程序在ServerStatus/clients下）：          
 客户端有两个版本，client-linux为普通linux，client-psutil为跨平台版，普通版不成功，换成跨平台版即可。        
