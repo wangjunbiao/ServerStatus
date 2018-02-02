@@ -19,7 +19,7 @@
    
 【克隆代码】:
 ```
-git clone git@github.com:wangjunbiao/ServerStatus-CN.git
+git clone https://github.com/wangjunbiao/ServerStatus-CN.git
 ```
 
 【服务端配置】（服务端程序在ServerStatus/web下）:  
