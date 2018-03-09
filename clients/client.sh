@@ -1,10 +1,19 @@
 #!/bin/bash
+# Verson:1.2
+# Auther:qiubian
+# 1.增加网卡选择
+# 2.增加网卡累计流量
+# 3.增加CPU分钟负载
+# 注.kernel. 2.6.32-696.el6.x86_64 需要调整读取cpu负载的参数,111行；
 
-SERVER="status.botox.bz"
+
+SERVER="xxxx"
 PORT=35601
 USER="s01"
 PASSWORD="some-hard-to-guess-copy-paste-password"
 INTERVAL=1 # Update interval
+NET_DEV="br1"   #netdev,etc|br1;
+
 
 
 command_exists () {
@@ -78,6 +87,12 @@ while $RUNNING; do
 
 		# Load Average
 		Load=$(awk '{ print $1 }' /proc/loadavg)
+        #CPU load1 load5 load15
+        Load_5=$(awk '{ print $2 }' /proc/loadavg)
+        Load_15=$(awk '{ print $3 }' /proc/loadavg)
+        # NETWORK IN OUT
+        sed -n 's/br1:\s//p' /proc/net/dev |awk '{print $1" " $9}'
+
 
 		# Memory
 		MemTotal=$(awk '/MemTotal/ {print $2}' /proc/meminfo)
@@ -95,8 +110,11 @@ while $RUNNING; do
 
 		# CPU
 		# Get the total CPU statistics, discarding the 'cpu ' prefix.
-		CPU=($(sed -n 's/^cpu\s//p' /proc/stat))
-		IDLE=${CPU[3]} # Just the idle CPU time.
+		# //由于内核2.6.32-696.el6.x86_64内核/proc/stat有9列,修改awk取值；
+        CPU=($(cat /proc/stat | grep 'cpu ' | awk '{print $2" "$3" "$4" "$5" "$6" "$7" "$8}'))
+        # //高版本内核选择
+        # CPU=($(sed -n 's/^cpu\s//p' /proc/stat)) 
+        IDLE=${CPU[3]} # Just the idle CPU time.
 		# Calculate the total CPU time.
 		TOTAL=0
 		for VALUE in "${CPU[@]}"; do
@@ -111,7 +129,9 @@ while $RUNNING; do
 		PREV_IDLE="$IDLE"
 
 		# Network traffic
-		NET=($(grep ":" /proc/net/dev | grep -v -e "lo" -e "tun" | awk '{a+=$2}{b+=$10}END{print a,b}'))
+        # 根据特殊情况监控特殊网卡
+		# NET=($(grep ":" /proc/net/dev | grep -v -e "lo" -e "tun" | awk '{a+=$2}{b+=$10}END{print a,b}'))
+        NET=($(grep ":" /proc/net/dev | egrep $NET_DEV | awk '{a+=$2}{b+=$10}END{print a,b}'))
 		NetRx="${NET[0]}"
 		NetTx="${NET[1]}"
 		if [ "$PREV_NetRx" == "" ]; then
@@ -123,7 +143,8 @@ while $RUNNING; do
 		PREV_NetRx="$NetRx"
 		PREV_NetTx="$NetTx"
 
-		echo -e "update {$Online \"uptime\": $Uptime, \"load\": $Load, \"memory_total\": $MemTotal, \"memory_used\": $MemUsed, \"swap_total\": $SwapTotal, \"swap_used\": $SwapUsed, \"hdd_total\": $HDDTotal, \"hdd_used\": $HDDUsed, \"cpu\": ${DIFF_USAGE}.0, \"network_rx\": $SpeedRx, \"network_tx\": $SpeedTx }"
+
+		echo -e "update {$Online \"uptime\": $Uptime,\"load_1\": $Load,\"load_5\": $Load_5,\"load_15\": $Load_15, \"load\": $Load, \"memory_total\": $MemTotal, \"memory_used\": $MemUsed, \"swap_total\": $SwapTotal, \"swap_used\": $SwapUsed, \"hdd_total\": $HDDTotal, \"hdd_used\": $HDDUsed, \"cpu\": ${DIFF_USAGE}.0, \"network_rx\": $SpeedRx, \"network_tx\": $SpeedTx,\"network_out\":$NetTx,\"network_in\":$NetRx }"
 	done | $NETBIN $SERVER $PORT | while IFS= read -r -d $'\0' x; do
 		if [ ! -f /tmp/fuckbash ]; then
 			if grep -q "IPv6" <<< "$x"; then
